@@ -14,11 +14,12 @@ module System.IO.Streams.Wai
 
 ------------------------------------------------------------------------------
 import           Blaze.ByteString.Builder (Builder)
-import           Control.Monad
+
 import           Control.Monad.IO.Class (MonadIO, liftIO)
 import           Data.Bool
-import           Data.ByteString (ByteString)
+import           Data.ByteString ( ByteString )
 import qualified Data.ByteString as S
+import qualified Data.Foldable as F
 import           Network.HTTP.Types
 import           Network.Wai
 import qualified System.IO.Streams as Streams
@@ -55,10 +56,13 @@ responseInputStream
 responseInputStream status headers stream = 
   responseStream status headers $ \send flush -> do
     is <- stream
-    void $ flip Streams.mapM is $ \mbuilder ->
-      case mbuilder of
-        Chunk b -> send b
-        Flush   -> flush
+    os <- makeOutputStream $ \m ->
+            F.forM_ m $ \x ->
+                case x of
+                  Chunk b -> send b
+                  Flush   -> flush
+    Streams.supply is os
+
 
 ------------------------------------------------------------------------------
 -- | Create a raw response using a @Producer@ and @Consumer@ to represent the input
