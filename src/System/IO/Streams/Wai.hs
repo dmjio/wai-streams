@@ -65,7 +65,7 @@ responseInputStream status headers stream =
 
 
 ------------------------------------------------------------------------------
--- | Create a raw response using a @Producer@ and @Consumer@ to represent the input
+-- | Create a raw response using a @InputStream@ and an @OutputStream@ to represent the input
 -- and output, respectively.
 responseRawInputStream
   :: (IO (InputStream ByteString) -> IO (OutputStream ByteString) -> IO ())
